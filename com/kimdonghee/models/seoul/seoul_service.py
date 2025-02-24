@@ -1,8 +1,10 @@
 
+import os
 import pandas as pd
 
 from com.kimdonghee.models.seoul.data_reader import DataReader
 from com.kimdonghee.models.seoul.dataset import Dataset
+from com.kimdonghee.models.seoul.key_retriever_singleton import KeyRetrieverSingleton
 
 
 class SeoulService:
@@ -51,7 +53,7 @@ class SeoulService:
         this.crime = self.new_model(temp[1])
         print("🤬😈Crime 데이터")
         print(this.crime)
-        this = self.crime_ratio(this)
+        # this = self.crime_ratio(this)
         this.pop = self.new_model(temp[2])
         print("😋😊Pop 데이터")
         print(this.pop)
@@ -81,7 +83,40 @@ class SeoulService:
         station_addrs = [] #api관련하여 작성하였다.
         station_lats = []
         station_lngs = []
-        # gmaps = DataReader.create_gmaps()
+
+        singleton1 = KeyRetrieverSingleton()
+        singleton2 = KeyRetrieverSingleton()
+
+        print("👩‍🦰👨‍🦰API Key:", singleton1.get_api_key())  # "my-secret-api-key"
+        print("👩‍🔧👨‍🔧singleton1 is singleton2:", singleton1 is singleton2)  # True (같은 객체)
+
+        gmaps = DataReader.create_gmaps()
+        for name in station_names:
+            tmp = gmaps.geocode(name, language = 'ko')
+            print(f"""{name}의 검색 결과:, {tmp[0].get("formatted_address")}""" ) #딕셔너리에 담아져 있기 때문에 프린터를 딕셔너리에 담아져 있다. 
+            station_addrs.append(tmp[0].get("formatted_address"))
+            tmp_loc = tmp[0].get("geometry")
+            station_lats.append(tmp_loc['location']['lat'])
+            station_lats.append(tmp_loc['location']['lng'])
+        print(f"🚈🚅자치구 리스트:, {station_addrs}")
+        gu_names = []
+        for addr in station_addrs:
+            tmp = addr.split()
+            tmp_gu = [gu for gu in tmp if gu[-1] == '구'][0]
+            gu_names.append(tmp_gu)
+        [print(f"자치구 리스트 2: {gu_names}")]
+        crime['자치구'] = gu_names
+        #저장할 디렉토리 경로 설정
+        save_dir = "C:\\Users\\bitcamp\\Documents\\kimdonghee250220\\com\\kimdonghee\\saved_data\\"
+        # 폴더가 없으면 생성
+        if not os.path.exists(save_dir):
+           os.makedirs(save_dir)
+        
+        # CSV 파일 저장
+        crime['자치구'] = gu_names
+        crime.to_csv(os.path.join(save_dir, "police_position.csv"), index=False) #내가 있는 위치에서 position_police에 대한 데이터를 saved_data에 올려줘.....올릴 때는 점 두개 쓰고 /를 쓴다.
+
+
         null_counts = this.crime.isnull().sum()
         print("🎈🎃🎆cctv 널 값 개수", this.cctv.head())
         print("🛩⛵👨‍🦳crime 널 값 개수",null_counts)
