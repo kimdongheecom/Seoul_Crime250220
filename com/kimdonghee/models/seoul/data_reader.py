@@ -33,17 +33,13 @@ class DataReader:
         file = self.new_file()
         return pd.read_csv(file, thousands=',')
 
-    def xls_to_dframe(self, header, usecols)-> object:
+    def xls_to_dframe(self, header, usecols)-> object: # excel(xls) 파일을 DataFrame으로 변환한다는 뜻이다. 
         file = self.new_file()
         return pd.read_excel(file, header=header, usecols=usecols)
 
     def json_load(self):
         file = self.new_file()
         return json.load(open(file))
-    
-    @staticmethod
-    def create_gmaps():
-        return googlemaps.Client(key='...')
 
     # cctv : object 
     # crime : object
