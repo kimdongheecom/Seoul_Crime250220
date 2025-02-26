@@ -10,7 +10,7 @@ class SeoulController: #dataset과 service를 둘다왔다갔다해야한다.
     
     def modelling(self, *args):
         this = self.service.preprocess(*args)
-        self.print_this(this)
+        # self.print_this(this)
         return this
     
      
